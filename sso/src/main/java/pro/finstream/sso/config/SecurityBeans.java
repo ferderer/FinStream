@@ -82,6 +82,7 @@ public class SecurityBeans {
 
             claims.claim("id", ui.id().toString());
             claims.claim("roles", ui.roles());
+            claims.subject(ui.username());
 
             if (OidcParameterNames.ID_TOKEN.equals(context.getTokenType().getValue())) {
                 claims.claim("email", ui.email());
