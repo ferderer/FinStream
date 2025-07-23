@@ -1,5 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { AuthService } from './auth/auth-service';
+import { RouterOutlet } from "@angular/router";
 
 @Component({
   selector: "app-root",
@@ -47,10 +48,7 @@ import { AuthService } from './auth/auth-service';
       </div>
 
       @if (authService.authenticated()) {
-        <div>
-          <h2>Stock Dashboard</h2>
-          <p>This is where your stock data will go...</p>
-        </div>
+        <router-outlet></router-outlet>
       }
     </div>
   `,
@@ -151,6 +149,7 @@ import { AuthService } from './auth/auth-service';
       }
     `,
   ],
+  imports: [RouterOutlet],
 })
 export class App {
   authService = inject(AuthService);

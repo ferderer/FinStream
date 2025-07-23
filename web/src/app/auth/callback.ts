@@ -73,9 +73,7 @@ export class Callback implements OnInit {
   async ngOnInit() {
     try {
       await this.authService.handleCallback();
-      setTimeout(() => {
-        this.router.navigate(["/"]);
-      }, 500);
+      await this.router.navigate(["/dashboard"]);
     }
     catch (error) {
       console.error("OAuth callback error:", error);

@@ -1,0 +1,9 @@
+{
+  "[html]": {
+    "editor.formatOnSave": false,
+    "editor.formatOnPaste": false,
+    "editor.formatOnType": false,
+    "editor.defaultFormatter": null
+  },
+  "html.format.enable": false
+}

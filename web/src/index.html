@@ -6,6 +6,12 @@
   <base href="/">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <!-- Fix for SockJS/STOMP global is not defined -->
+  <script>
+    if (typeof global === 'undefined') {
+      var global = window;
+    }
+  </script>
 </head>
 <body>
   <app-root></app-root>
