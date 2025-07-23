@@ -20,7 +20,8 @@
         <spring-cloud.version>2024.0.0</spring-cloud.version>
 
         <argLine></argLine>
-        <debug.args>-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=8000</debug.args>
+        <debug.port>8002</debug.port>
+        <debug.args>-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=${debug.port}</debug.args>
         <spring.profiles.test>test</spring.profiles.test>
     </properties>
 
@@ -64,6 +65,19 @@
         <dependency>
             <groupId>org.springframework.kafka</groupId>
             <artifactId>spring-kafka</artifactId>
+            <version>4.0.0-M2</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.kafka</groupId>
+            <artifactId>kafka-clients</artifactId>
+            <version>4.0.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.jspecify</groupId>
+            <artifactId>jspecify</artifactId>
+            <version>1.0.0</version>
         </dependency>
 
         <!-- === Testing =================================================== -->
@@ -146,55 +160,7 @@
                                 </watches>
                             </configuration>
                         </execution>
-                        <execution>
-                            <id>flyway</id>
-                            <configuration>
-                                <goals>
-                                    <goal>flyway:migrate@local</goal>
-                                </goals>
-                                <watches>
-                                    <watch>
-                                        <directory>src/main/resources/db</directory>
-                                    </watch>
-                                </watches>
-                            </configuration>
-                        </execution>
                     </executions>
-                </plugin>
-
-                <plugin>
-                    <groupId>org.flywaydb</groupId>
-                    <artifactId>flyway-maven-plugin</artifactId>
-                    <version>${flyway.version}</version>
-                    <executions>
-                        <execution>
-                            <id>local</id>
-                            <configuration>
-                                <url>${env.SPRING_DATASOURCE_URL}</url>
-                                <user>${env.SPRING_DATASOURCE_USERNAME}</user>
-                                <password>${env.SPRING_DATASOURCE_PASSWORD}</password>
-                                <locations>
-                                    <location>filesystem:src/main/resources/db/migration</location>
-                                    <location>filesystem:src/main/resources/db/local</location>
-                                </locations>
-                                <baselineOnMigrate>true</baselineOnMigrate>
-                                <cleanDisabled>false</cleanDisabled>
-                            </configuration>
-                        </execution>
-                    </executions>
-                    <dependencies>
-                        <dependency>
-                            <groupId>org.postgresql</groupId>
-                            <artifactId>postgresql</artifactId>
-                            <version>${postgresql.version}</version>
-                        </dependency>
-
-                        <dependency>
-                            <groupId>org.flywaydb</groupId>
-                            <artifactId>flyway-database-postgresql</artifactId>
-                            <version>${flyway.version}</version>
-                        </dependency>
-                    </dependencies>
                 </plugin>
 
                 <plugin>
@@ -235,6 +201,9 @@
     <profiles>
         <profile>
             <id>dev</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
             <properties>
                 <jacoco.skip>true</jacoco.skip>
                 <maven.test.skip>true</maven.test.skip>

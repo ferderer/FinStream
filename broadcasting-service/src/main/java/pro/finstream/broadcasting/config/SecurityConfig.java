@@ -1,33 +1,28 @@
 package pro.finstream.broadcasting.config;
 
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-/**
- * Security configuration for the FinStream Broadcasting Service.
- * 
- * Configures JWT-based authentication for REST endpoints and WebSocket connections,
- * with CORS support for Angular frontend integration.
- * 
- * Banking Industry Pattern: OAuth2 resource server configuration for
- * financial services with proper CORS and session management.
- * 
- * @author FinStream Platform
- * @version 1.0.0
- */
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
@@ -38,57 +33,25 @@ public class SecurityConfig {
     @Value("${finstream.cors.allowed-origins}")
     private String allowedOrigins;
 
-    /**
-     * Configures the security filter chain with JWT authentication.
-     */
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http
-            // Disable CSRF for stateless API
-            .csrf(AbstractHttpConfigurer::disable)
-            
-            // Enable CORS
-            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-            
-            // Configure session management as stateless
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            
-            // Configure authorization rules
-            .authorizeHttpRequests(authz -> authz
-                // Public endpoints - no authentication required
-                .requestMatchers("/actuator/health", "/actuator/info").permitAll()
-                .requestMatchers("/error", "/error/**").permitAll()
-                .requestMatchers("/ws-test/**").permitAll() // Test endpoint
-                
-                // WebSocket handshake endpoint - will be handled by WebSocket interceptor
-                .requestMatchers("/stock-updates/**").permitAll()
-                
-                // All API endpoints require authentication
+        return http
+            .csrf(c -> c.disable())
+            .cors(c -> c.configurationSource(corsConfigurationSource()))
+            .sessionManagement(c -> c.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .authorizeHttpRequests(c -> c
                 .requestMatchers("/api/**").authenticated()
-                
-                // All other requests require authentication
-                .anyRequest().authenticated()
+                .anyRequest().permitAll()
             )
-            
-            // Configure OAuth2 Resource Server with JWT
-            .oauth2ResourceServer(oauth2 -> oauth2
-                .jwt(jwt -> jwt.decoder(jwtDecoder()))
-            );
-
-        return http.build();
+            .oauth2ResourceServer(c -> c.jwt(jwt -> jwt.decoder(jwtDecoder())))
+            .build();
     }
 
-    /**
-     * JWT decoder configuration pointing to the SSO service.
-     */
     @Bean
     public JwtDecoder jwtDecoder() {
         return NimbusJwtDecoder.withJwkSetUri(jwkSetUri).build();
     }
 
-    /**
-     * CORS configuration to allow Angular frontend access.
-     */
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
@@ -122,5 +85,25 @@ public class SecurityConfig {
         source.registerCorsConfiguration("/**", configuration);
         
         return source;
+    }
+
+    @Bean
+    public JwtAuthenticationConverter jwtAuthenticationConverter() {
+        Converter<Jwt, Collection<GrantedAuthority>> authoritiesConverter = jwt -> {
+            Collection<String> roles = jwt.getClaimAsStringList("roles");
+            
+            if (roles == null || roles.isEmpty()) {
+                return Collections.emptyList();
+            }
+            
+            return roles.stream()
+                .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
+                .collect(Collectors.toList());
+        };
+        
+        JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
+        converter.setJwtGrantedAuthoritiesConverter(authoritiesConverter);
+        converter.setPrincipalClaimName("sub");
+        return converter;
     }
 }
