@@ -50,6 +50,10 @@ public enum ErrorCode {
     E_INVALID_SYMBOL_FORMAT,
     E_INVALID_MESSAGE_TYPE,
     E_MESSAGE_TOO_LARGE,
+    E_ALREADY_ADDED,
+    E_NOT_FOUND,
+    E_TARGET_PRICE_REQUIRED,
+    E_TARGET_PERCENT_REQUIRED,
     
     // Rate Limiting & Throttling
     E_RATE_LIMIT_EXCEEDED,

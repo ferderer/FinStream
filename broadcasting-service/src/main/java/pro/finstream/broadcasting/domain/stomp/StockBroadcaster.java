@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
-import pro.finstream.broadcasting.domain.stockprice.StockPrice;
+import pro.finstream.broadcasting.domain.prices.StockPrice;
 
 /**
  * Stock Broadcasting Service for Real-time STOMP WebSocket Updates
@@ -33,9 +33,9 @@ import pro.finstream.broadcasting.domain.stockprice.StockPrice;
  * @author FinStream Platform
  */
 @Service
-public class StockBroadcastingService {
+public class StockBroadcaster {
 
-    private static final Logger log = LoggerFactory.getLogger(StockBroadcastingService.class);
+    private static final Logger log = LoggerFactory.getLogger(StockBroadcaster.class);
     
     // STOMP WebSocket destinations
     private static final String TOPIC_STOCK_PRICES = "/topic/stocks/prices";
@@ -49,7 +49,7 @@ public class StockBroadcastingService {
     private final Map<String, AtomicLong> symbolUpdateCounts = new ConcurrentHashMap<>();
     private final Map<String, Instant> lastUpdateTimes = new ConcurrentHashMap<>();
     
-    public StockBroadcastingService(SimpMessagingTemplate messagingTemplate) {
+    public StockBroadcaster(SimpMessagingTemplate messagingTemplate) {
         this.messagingTemplate = messagingTemplate;
         log.info("StockBroadcastingService initialized - ready for real-time stock price broadcasting");
     }

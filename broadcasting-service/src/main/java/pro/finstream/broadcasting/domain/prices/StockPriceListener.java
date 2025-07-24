@@ -1,4 +1,4 @@
-package pro.finstream.broadcasting.domain.stockprice;
+package pro.finstream.broadcasting.domain.prices;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -10,15 +10,15 @@ import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Service;
 import pro.finstream.broadcasting.common.error.BaseException;
 import pro.finstream.broadcasting.common.error.ErrorCode;
-import pro.finstream.broadcasting.domain.stomp.StockBroadcastingService;
+import pro.finstream.broadcasting.domain.stomp.StockBroadcaster;
 
 @Service
 @Slf4j
-public class StockPriceConsumerService {
+public class StockPriceListener {
 
-    private final StockBroadcastingService broadcastingService;
+    private final StockBroadcaster broadcastingService;
 
-    public StockPriceConsumerService(StockBroadcastingService broadcastingService) {
+    public StockPriceListener(StockBroadcaster broadcastingService) {
         this.broadcastingService = broadcastingService;
     }
     
